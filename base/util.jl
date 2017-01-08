@@ -435,7 +435,7 @@ See also [`logging`](@ref).
 """
 function info(io::IO, msg...; prefix="INFO: ")
     io = redirect(io, log_info_to, :info)
-    print_with_color(info_color(), io, prefix; bold = true)
+    print_with_color(info_color(), io, prefix)
     println_with_color(info_color(), io, chomp(string(msg...)))
     return
 end
@@ -470,8 +470,7 @@ function warn(io::IO, msg...;
         push!(have_warned, key)
     end
     io = redirect(io, log_warn_to, :warn)
-    print_with_color(warn_color(), io, prefix; bold = true)
-    print_with_color(warn_color(), io, str)
+    print_with_color(warn_color(), io, prefix, str)
     if bt !== nothing
         show_backtrace(io, bt)
     end

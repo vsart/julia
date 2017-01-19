@@ -15,15 +15,13 @@ function Signature(name::AbstractString, email::AbstractString)
     @check ccall((:git_signature_now, :libgit2), Cint,
                  (Ptr{Ptr{SignatureStruct}}, Cstring, Cstring), sig_ptr_ptr, name, email)
     sig = GitSignature(sig_ptr_ptr[])
-    s = Signature(sig.ptr)
-    close(sig)
+    s   = Signature(sig.ptr)
     return s
 end
 
 function Signature(repo::GitRepo)
     sig = default_signature(repo)
-    s = Signature(sig.ptr)
-    close(sig)
+    s   = Signature(sig.ptr)
     return s
 end
 

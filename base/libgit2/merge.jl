@@ -26,12 +26,11 @@ end
 
 function GitAnnotated(repo::GitRepo, comittish::AbstractString)
     obj = revparse(repo, comittish)
-    try
-        cmt = peel(obj, Consts.OBJ_COMMIT)
-        cmt === nothing && return nothing
+    cmt = peel(obj, Consts.OBJ_COMMIT)
+    if cmt === nothing
+        return nothing
+    else
         return GitAnnotated(repo, GitHash(cmt))
-    finally
-        close(obj)
     end
 end
 
@@ -55,20 +54,14 @@ function ffmerge!(repo::GitRepo, ann::GitAnnotated)
     ann_cmt_oid = commit(ann)
     cmt = get(GitCommit, repo, ann_cmt_oid)
     cmt === nothing && return false # could not find commit tree
-    try
-        checkout_tree(repo, cmt)
-        with(head(repo)) do head_ref
-            cmt_oid = GitHash(cmt)
-            msg = "libgit2.merge: fastforward $(string(cmt_oid)) into $(name(head_ref))"
-            new_head_ref = if reftype(head_ref) == Consts.REF_OID
-                target!(head_ref, cmt_oid, msg=msg)
-            else
-                GitReference(repo, cmt_oid, fullname(head_ref), msg=msg)
-            end
-            close(new_head_ref)
-        end
-    finally
-        close(cmt)
+    checkout_tree(repo, cmt)
+    head_ref = head(repo)
+    cmt_oid  = GitHash(cmt)
+    msg      = "libgit2.merge: fastforward $(string(cmt_oid)) into $(name(head_ref))"
+    new_head_ref = if reftype(head_ref) == Consts.REF_OID
+        target!(head_ref, cmt_oid, msg=msg)
+    else
+        GitReference(repo, cmt_oid, fullname(head_ref), msg=msg)
     end
     return true
 end

@@ -35,12 +35,9 @@ end
 function read_tree!(idx::GitIndex, tree_id::GitHash)
     repo = repository(idx)
     tree = get(GitTree, repo, tree_id)
-    try
-        @check ccall((:git_index_read_tree, :libgit2), Cint,
-                     (Ptr{Void}, Ptr{Void}), idx.ptr, tree.ptr)
-    finally
-        close(tree)
-    end
+    @check ccall((:git_index_read_tree, :libgit2), Cint,
+                 (Ptr{Void}, Ptr{Void}), idx.ptr, tree.ptr)
+    return idx
 end
 
 function add!{T<:AbstractString}(idx::GitIndex, files::T...;
@@ -48,50 +45,48 @@ function add!{T<:AbstractString}(idx::GitIndex, files::T...;
     @check ccall((:git_index_add_all, :libgit2), Cint,
                  (Ptr{Void}, Ptr{StrArrayStruct}, Cuint, Ptr{Void}, Ptr{Void}),
                  idx.ptr, collect(files), flags, C_NULL, C_NULL)
+    return idx
 end
 
 function update!{T<:AbstractString}(idx::GitIndex, files::T...)
     @check ccall((:git_index_update_all, :libgit2), Cint,
                  (Ptr{Void}, Ptr{StrArrayStruct}, Ptr{Void}, Ptr{Void}),
                  idx.ptr, collect(files), C_NULL, C_NULL)
+    return idx
 end
 
 function remove!{T<:AbstractString}(idx::GitIndex, files::T...)
     @check ccall((:git_index_remove_all, :libgit2), Cint,
                  (Ptr{Void}, Ptr{StrArrayStruct}, Ptr{Void}, Ptr{Void}),
                  idx.ptr, collect(files), C_NULL, C_NULL)
+    return idx
 end
 
 function add!{T<:AbstractString}(repo::GitRepo, files::T...;
              flags::Cuint = Consts.INDEX_ADD_DEFAULT)
-    with(GitIndex, repo) do idx
-        add!(idx, files..., flags = flags)
-        write!(idx)
-    end
-    return
+    idx = GitIndex(repo)
+    add!(idx, files..., flags = flags)
+    write!(idx)
+    return repo
 end
 
 function update!{T<:AbstractString}(repo::GitRepo, files::T...)
-    with(GitIndex, repo) do idx
-        update!(idx, files...)
-        write!(idx)
-    end
-    return
+    idx = GitIndex(repo)
+    update!(idx, files...)
+    write!(idx)
+    return repo
 end
 
 function remove!{T<:AbstractString}(repo::GitRepo, files::T...)
-    with(GitIndex, repo) do idx
-        remove!(idx, files...)
-        write!(idx)
-    end
-    return
+    idx = GitIndex(repo)
+    remove!(idx, files...)
+    write!(idx)
+    return repo
 end
 
 function read!(repo::GitRepo, force::Bool = false)
-    with(GitIndex, repo) do idx
-        read!(idx, force)
-    end
-    return
+    read!(GitIndex(repo), force)
+    return repo
 end
 
 function Base.count(idx::GitIndex)

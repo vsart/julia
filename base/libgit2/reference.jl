@@ -122,9 +122,6 @@ function peel{T <: GitObject}(::Type{T}, ref::GitReference)
     if err == Int(Error.ENOTFOUND)
         return GitHash()
     elseif err != Int(Error.GIT_OK)
-        if obj_ptr_ptr[] != C_NULL
-            close(GitUnknownObject(ref.repo, obj_ptr_ptr[]))
-        end
         throw(Error.GitError(err))
     end
     return T(ref.repo, obj_ptr_ptr[])
@@ -136,7 +133,7 @@ function ref_list(repo::GitRepo)
                       (Ptr{StrArrayStruct}, Ptr{Void}), sa_ref, repo.ptr)
     res = convert(Vector{String}, sa_ref[])
     free(sa_ref)
-    res
+    return res
 end
 
 function create_branch(repo::GitRepo,
@@ -172,9 +169,6 @@ function lookup_branch(repo::GitRepo,
     if err == Int(Error.ENOTFOUND)
         return nothing
     elseif err != Int(Error.GIT_OK)
-        if ref_ptr_ptr[] != C_NULL
-            close(GitReference(repo, ref_ptr_ptr[]))
-        end
         throw(Error.GitError(err))
     end
     return GitReference(repo, ref_ptr_ptr[])
@@ -188,9 +182,6 @@ function upstream(ref::GitReference)
     if err == Int(Error.ENOTFOUND)
         return nothing
     elseif err != Int(Error.GIT_OK)
-        if ref_ptr_ptr[] != C_NULL
-            close(GitReference(ref.repo, ref_ptr_ptr[]))
-        end
         throw(Error.GitError(err))
     end
     return GitReference(ref.repo, ref_ptr_ptr[])

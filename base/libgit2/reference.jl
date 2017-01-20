@@ -27,7 +27,7 @@ to this branch will have no parents.
 function isorphan(repo::GitRepo)
     r = @check ccall((:git_repository_head_unborn, :libgit2), Cint,
                      (Ptr{Void},), repo.ptr)
-    r != 0
+    return r != 0
 end
 
 function head(repo::GitRepo)
@@ -44,9 +44,7 @@ function shortname(ref::GitReference)
     return unsafe_string(name_ptr)
 end
 
-function reftype(ref::GitReference)
-    return ccall((:git_reference_type, :libgit2), Cint, (Ptr{Void},), ref.ptr)
-end
+reftype(ref::GitReference) = ccall((:git_reference_type, :libgit2), Cint, (Ptr{Void},), ref.ptr)
 
 function fullname(ref::GitReference)
     isempty(ref) && return ""
@@ -114,8 +112,9 @@ function Base.show(io::IO, ref::GitReference)
         println(io, "Tag with name ", name(ref))
     end
 end
+
 function peel{T <: GitObject}(::Type{T}, ref::GitReference)
-    git_otype = getobjecttype(T)
+    git_otype   = getobjecttype(T)
     obj_ptr_ptr = Ref{Ptr{Void}}(C_NULL)
     err = ccall((:git_reference_peel, :libgit2), Cint,
                  (Ptr{Ptr{Void}}, Ptr{Void}, Cint), obj_ptr_ptr, ref.ptr, git_otype)
@@ -230,7 +229,7 @@ Base.iteratorsize(::Type{GitBranchIter}) = Base.SizeUnknown()
 
 function Base.map(f::Function, bi::GitBranchIter)
     res = nothing
-    s = start(bi)
+    s   = start(bi)
     while !done(bi, s)
         val = f(s[1:2])
         if res === nothing

@@ -6,8 +6,9 @@ function message(c::GitCommit, raw::Bool=false)
                    ccall((:git_commit_message, :libgit2), Cstring, (Ptr{Void},), c.ptr)
     if msg_ptr == C_NULL
         return nothing
+    else
+        return unsafe_string(msg_ptr)
     end
-    return unsafe_string(msg_ptr)
 end
 
 function author(c::GitCommit)
@@ -37,8 +38,8 @@ function commit(repo::GitRepo,
                 tree::GitTree,
                 parents::GitCommit...)
     commit_id_ptr = Ref(GitHash())
-    nparents = length(parents)
-    parentptrs = Ptr{Void}[c.ptr for c in parents]
+    nparents      = length(parents)
+    parentptrs    = Ptr{Void}[c.ptr for c in parents]
     @check ccall((:git_commit_create, :libgit2), Cint,
                  (Ptr{GitHash}, Ptr{Void}, Ptr{UInt8},
                   Ptr{SignatureStruct}, Ptr{SignatureStruct},

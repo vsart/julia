@@ -26,10 +26,11 @@ end
 
 function repository(idx::GitIndex)
     if isnull(idx.nrepo)
-        throw(GitError(Error.Index, Error.ENOTFOUND, "Index does not have an owning repository."))
-    else
-        return Base.get(idx.nrepo)
+        throw(GitError(Error.Index,
+                       Error.ENOTFOUND,
+                       "Index does not have an owning repository."))
     end
+    return Base.get(idx.nrepo)
 end
 
 function read_tree!(idx::GitIndex, tree_id::GitHash)
@@ -89,9 +90,7 @@ function read!(repo::GitRepo, force::Bool = false)
     return repo
 end
 
-function Base.count(idx::GitIndex)
-    return ccall((:git_index_entrycount, :libgit2), Csize_t, (Ptr{Void},), idx.ptr)
-end
+Base.count(idx::GitIndex) = ccall((:git_index_entrycount, :libgit2), Csize_t, (Ptr{Void},), idx.ptr)
 
 function Base.getindex(idx::GitIndex, i::Integer)
     ie_ptr = ccall((:git_index_get_byindex, :libgit2),

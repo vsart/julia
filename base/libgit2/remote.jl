@@ -50,7 +50,7 @@ function fetch_refspecs(rmt::GitRemote)
                  (Ptr{StrArrayStruct}, Ptr{Void}), sa_ref, rmt.ptr)
     res = convert(Vector{String}, sa_ref[])
     free(sa_ref)
-    res
+    return res
 end
 
 function push_refspecs(rmt::GitRemote)
@@ -59,7 +59,7 @@ function push_refspecs(rmt::GitRemote)
                  (Ptr{StrArrayStruct}, Ptr{Void}), sa_ref, rmt.ptr)
     res = convert(Vector{String}, sa_ref[])
     free(sa_ref)
-    res
+    return res
 end
 
 function fetch{T<:AbstractString}(rmt::GitRemote, refspecs::Vector{T};

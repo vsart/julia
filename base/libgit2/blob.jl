@@ -1,12 +1,8 @@
 # This file is a part of Julia. License is MIT: http://julialang.org/license
 
-function content(blob::GitBlob)
-    return ccall((:git_blob_rawcontent, :libgit2), Ptr{Void}, (Ptr{Void},), blob.ptr)
-end
+content(blob::GitBlob) = ccall((:git_blob_rawcontent, :libgit2), Ptr{Void}, (Ptr{Void},), blob.ptr)
 
-function Base.length(blob::GitBlob)
-    return ccall((:git_blob_rawsize, :libgit2), Int64, (Ptr{Void},), blob.ptr)
-end
+Base.length(blob::GitBlob) = ccall((:git_blob_rawsize, :libgit2), Int64, (Ptr{Void},), blob.ptr)
 
 """
 Use a heuristic to guess if a file is binary: searching for NULL bytes and
@@ -31,8 +27,7 @@ function GitBlob(repo::GitRepo, path::AbstractString)
     @check ccall((:git_blob_create_fromdisk, :libgit2), Cint,
                  (Ptr{GitHash}, Ptr{Void}, Ptr{UInt8}), blob_id_ptr,
                  repo.ptr, path)
-    blob = get(GitBlob, repo, blob_id_ptr[])
-    return blob
+    return get(GitBlob, repo, blob_id_ptr[])
 end
 
 function Base.show(io::IO, blob::GitBlob)

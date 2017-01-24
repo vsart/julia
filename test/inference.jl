@@ -491,3 +491,12 @@ tpara18457{I}(::Type{AbstractMyType18457{I}}) = I
 tpara18457{A<:AbstractMyType18457}(::Type{A}) = tpara18457(supertype(A))
 @test tpara18457(MyType18457{true}) === true
 
+fUnionAll{T}(::Type{T}) = Type{S} where S <: T
+@inferred fUnionAll(Real) == Type{T} where T <: Real
+@inferred fUnionAll(Rational{T} where T <: AbstractFloat) == Type{T} where T<:(Rational{S} where S <: AbstractFloat)
+
+fComplicatedUnionAll{T}(::Type{T}) = Type{Tuple{S,rand() >= 0.5 ? Int : Float64}} where S <: T
+let pub = Base.parameter_upper_bound, x = fComplicatedUnionAll(Real)
+    @test pub(pub(x, 1), 1) == Real
+    @test pub(pub(x, 1), 2) == Int || pub(pub(x, 1), 2) == Float64
+end

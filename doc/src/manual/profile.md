@@ -243,7 +243,7 @@ Let's discuss these arguments in order:
 
     ```julia
     s = open("/tmp/prof.txt","w")
-    Profile.print(s,cols = 500)
+    Profile.print(IOContext(s, displaysize = (24, 500)))
     close(s)
     ```
   * `maxdepth` can be used to limit the size of the output in `:tree` format (it nests only up to

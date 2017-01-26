@@ -936,3 +936,9 @@ dynamic_test = DynamicDocType("test 1")
 @test docstrings_equal(@doc(dynamic_test), doc"test 1")
 dynamic_test.x = "test 2"
 @test docstrings_equal(@doc(dynamic_test), doc"test 2")
+
+# Equality testing
+
+@test Text("docstring") == Text("docstring")
+@test HTML("<b>docstring</b>") == HTML("<b>docstring</b>")
+@test Text("docstring1") ≠ Text("docstring2")

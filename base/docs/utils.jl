@@ -2,7 +2,7 @@
 
 # Text / HTML objects
 
-import Base: print, show
+import Base: print, show, ==
 
 export HTML, @html_str
 
@@ -71,6 +71,8 @@ end
 print(io::IO, t::Text) = print(io, t.content)
 print{F <: Function}(io::IO, t::Text{F}) = t.content(io)
 show(io::IO, t::Text) = print(io, t)
+
+=={T<:Union{HTML, Text}}(t1::T, t2::T) = t1.content == t2.content
 
 """
     @text_str -> Docs.Text

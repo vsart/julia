@@ -2105,7 +2105,7 @@ A parallel for loop of the form :
 
 The loop is executed in parallel across all workers, with each worker executing a subset
 of the range. The call waits for completion of all iterations on all workers before returning.
-Any updates to variables outside the loop body is not relected on the calling node.
+Any updates to variables outside the loop body is not reflected on the calling node.
 However, this is a common requirement and can be achieved in a couple of ways. One, the loop body
 can update shared arrays, wherein the updates are visible on all nodes mapping the array. Second,
 [`ParallelAccumulator`](@ref) objects can be used to collect computed values efficiently.
@@ -2174,7 +2174,7 @@ end
     ParallelAccumulator{T}(f, [initial])
 
 Constructs a reducing accumulator designed to be used in conjunction with `@parallel`
-for-loops. Arguments are `f`, a reducer function and an optional `initial` value.
+for-loops. Arguments are a reducer function `f`, and an optional `initial` value.
 
 The body of the `@parallel` for-loop can refer to multiple `ParallelAccumulator`s.
 
@@ -2190,7 +2190,7 @@ for p in workers()
         for i in 1:10
             push!(acc, i)    # Local accumulation on each worker
         end
-        push!(acc)           # Explict push of local accumulation to driver node (typically node 1)
+        push!(acc)           # Explicit push of local accumulation to driver node (typically node 1)
     end
 end
 result = take!(acc)
@@ -2255,7 +2255,7 @@ function deserialize(s::AbstractSerializer, t::Type{T}) where T <: ParallelAccum
 end
 
 """
-    push!(acc::ParallelAccumulator, v)
+    push!(pacc::ParallelAccumulator, v)
 
 Called in the body of [`@parallel`](@ref) for-loops to reduce and accumulate values.
 """
@@ -2284,7 +2284,7 @@ function push!(pacc::ParallelAccumulator, v)
 end
 
 """
-    push!(acc::ParallelAccumulator)
+    push!(pacc::ParallelAccumulator)
 
 When a [`ParallelAccumulator`](@ref) is used in a distributed fashion independent of [`@parallel`](@ref),
 locally accumulated values must be explicitly pushed to the caller once on each worker. When called without a
@@ -2293,7 +2293,7 @@ value to reduce, `push!(acc)` sends locally accumulated values to the node drivi
 push!(pacc::ParallelAccumulator) = put!(pacc.chnl, (myid(), get(pacc.value), pacc.cnt))
 
 """
-    wait(acc::ParallelAccumulator)
+    wait(pacc::ParallelAccumulator)
 
 Waits to reduce and accumulate values from all participating workers.
 """
@@ -2314,7 +2314,7 @@ end
 
 
 """
-    fetch(acc::ParallelAccumulator)
+    fetch(pacc::ParallelAccumulator)
 
 Waits for and returns the result of a parallel accumulation.
 """
@@ -2322,7 +2322,7 @@ fetch(pacc::ParallelAccumulator) = (wait(pacc); get(pacc.value))
 
 
 """
-    take!(acc::ParallelAccumulator)
+    take!(pacc::ParallelAccumulator)
 
 Waits for and returns the result of a parallel accumulation. Also resets the
 accumulator object, thereby allowing it to be reused in an another call.
@@ -2339,10 +2339,10 @@ end
 
 
 """
-    count(acc::ParallelAccumulator)
+    count(pacc::ParallelAccumulator)
 
 Returns the number of reduction operations performed on this accumulator. In the context
-of [`@parallel`](@ref) calls this is equal to the range length.
+of [`@parallel`](@ref) this is equal to the range length.
 """
 count(pacc::ParallelAccumulator) = pacc.cnt
 

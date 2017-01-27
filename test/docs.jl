@@ -940,5 +940,7 @@ dynamic_test.x = "test 2"
 # Equality testing
 
 @test Text("docstring") == Text("docstring")
+@test hash(Text("docstring")) == hash(Text("docstring"))
 @test HTML("<b>docstring</b>") == HTML("<b>docstring</b>")
 @test Text("docstring1") ≠ Text("docstring2")
+@test hash(Text("docstring1")) ≠ hash(Text("docstring2"))

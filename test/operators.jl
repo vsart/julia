@@ -97,3 +97,11 @@ end
     B = 3 .> [1 -1 5] .> 0
     @test B == [true false false]
 end
+
+# issue #19662
+@testset "mod1/fld1 overflow" begin
+	@test mod1(2, typemax(Int)) == 2
+	@test fld1(2, typemax(Int)) == 1
+	@test fld1(-1, typemin(Int)) == 1
+end
+@test mod1(0, -5) == -5
